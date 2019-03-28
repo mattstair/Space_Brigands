@@ -108,11 +108,12 @@ class Log:
 
 
 class Button:
-    def __init__(self, textlines, text_color=BLACK, o_color=BLACK,
+    def __init__(self, textlines, text_color=BLACK, o_color=BLACK, bg_img=None,
                  bg_color=WHITE, auto_size=True, rect=None, w=0, h=0, return_value=True):
         self.textlines = textlines
         self.text_color = text_color
         self.o_color = o_color
+        self.bg_img = bg_img
         self.bg_color = bg_color
         self.return_value = return_value
         self.text_width = 0
@@ -142,6 +143,8 @@ class Button:
     def make_image(self):
         self.image = pygame.Surface((self.rect.w, self.rect.h))
         self.image.fill(self.bg_color)
+        if self.bg_img:
+            self.image.blit(self.bg_img, (0, 0))
         pygame.draw.rect(self.image, self.o_color, self.image.get_rect(), 1)
         y = (self.rect.h - self.text_height) / 2
         for textline in self.textlines:

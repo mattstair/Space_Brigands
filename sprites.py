@@ -27,26 +27,20 @@ class Tony(pygame.sprite.Sprite):
         midbottom = self.rect.midbottom
 
         if self.fluff:
-            if size < 50:
-                self.image = pygame.transform.scale(self.game.fluff_img, (64, 64))
-            elif size < 75:
-                self.image = pygame.transform.scale(self.game.fluff_img, (128, 128))
-            elif size < 100:
-                self.image = pygame.transform.scale(self.game.fluff_img, (256, 256))
-            else:
-                self.image = pygame.transform.scale(self.game.fluff_img, (512, 512))
-
+            image = self.game.fluff_img
         else:
-            if size < 50:
-                self.image = pygame.transform.scale(self.game.player_img, (64, 64))
-            elif size < 75:
-                self.image = pygame.transform.scale(self.game.player_img, (128, 128))
-            elif size < 100:
-                self.image = pygame.transform.scale(self.game.player_img, (256, 256))
-            else:
-                self.image = pygame.transform.scale(self.game.player_img, (512, 512))
+            image = self.game.player_img
 
-            self.image.set_colorkey((20, 52, 100))
+        if size < 50:
+            self.image = pygame.transform.scale(image, (64, 64))
+        elif size < 75:
+            self.image = pygame.transform.scale(image, (128, 128))
+        elif size < 100:
+            self.image = pygame.transform.scale(image, (256, 256))
+        else:
+            self.image = pygame.transform.scale(image, (512, 512))
+
+        self.image.set_colorkey((20, 52, 100))
         self.rect = self.image.get_rect()
         self.rect.midbottom = midbottom
         self.pos = vec(self.rect.topleft)

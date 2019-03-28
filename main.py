@@ -60,6 +60,7 @@ class Game:
             'burnout': pygame.image.load(path.join(self.img_dir, 'burnout-icon_24x24.png')).convert(),
             'costs': pygame.image.load(path.join(self.img_dir, 'costs-icon_24x24.png')).convert(),
             'ego': pygame.image.load(path.join(self.img_dir, 'ego-icon_24x24.png')).convert(),
+            'energy': pygame.image.load(path.join(self.img_dir, 'energy-icon_24x24.png')).convert(),
             'fire': pygame.image.load(path.join(self.img_dir, 'fire-icon_24x24.png')).convert(),
             'likes': pygame.image.load(path.join(self.img_dir, 'likes-icon_24x24.png')).convert(),
             'money': pygame.image.load(path.join(self.img_dir, 'money-icon_24x24.png')).convert(),
@@ -95,9 +96,25 @@ class Game:
         draw_text(self.upgrade_window.full_surf, 'Strategies:', 30, BLACK, 'topleft', 10, 10)
         draw_text(self.upgrade_window.full_surf, 'Perks:', 30, BLACK, 'topleft', 10, 710)
         draw_text(self.upgrade_window.full_surf, 'Activities (repeatable):', 30, BLACK, 'topleft', 10, 1410)
+        self.button_backgrounds = {
+            'catch phrase': pygame.image.load(path.join(self.img_dir, 'catch-phrases-200x100.png')).convert_alpha(),
+            'channel art': pygame.image.load(path.join(self.img_dir, 'channel-art-200x100.png')).convert_alpha(),
+            'eat something': pygame.image.load(path.join(self.img_dir, 'eat-something-200x100.png')).convert_alpha(),
+            'fake swears': pygame.image.load(path.join(self.img_dir, 'fake-swears-200x100.png')).convert_alpha(),
+            'gaming chair': pygame.image.load(path.join(self.img_dir, 'gaming-chair-200x100.png')).convert_alpha(),
+            'live stream': pygame.image.load(path.join(self.img_dir, 'live-stream-200x100.png')).convert_alpha(),
+            'puns': pygame.image.load(path.join(self.img_dir, 'puns-200x100.png')).convert_alpha(),
+            'quality content': pygame.image.load(path.join(self.img_dir, 'quality-content-200x100.png')).convert_alpha(),
+            'swears': pygame.image.load(path.join(self.img_dir, 'swears-200x100.png')).convert_alpha(),
+        }
         for upgrade in self.upgrades:
             upgrade_dict = self.upgrades[upgrade]
-            self.upgrade_buttons.append(Button([TextLine(upgrade_dict['text'], size=upgrade_dict['font size'])],
+            text = upgrade_dict['text']
+            bg_img = None
+            if upgrade in self.button_backgrounds:
+                bg_img = self.button_backgrounds[upgrade]
+                text = ''
+            self.upgrade_buttons.append(Button([TextLine(text, size=upgrade_dict['font size'])], bg_img=bg_img,
                                                auto_size=False, rect=upgrade_dict['rect'], return_value=upgrade))
 
     def star_field(self):
@@ -550,6 +567,7 @@ class Game:
         draw_text(self.window, 'Net: ', 20, WHITE, 'topleft', 30, y)
         draw_text(self.window, '$ '+"{:,}".format(self.revenue-self.eat_rate), 20, WHITE, 'topright', screen_offset, y)
         y += 35
+        self.window.blit(self.icons['energy'], (5, y, 24, 24))
         draw_text(self.window, 'Energy:', 20, WHITE, 'topleft', 30, y)
 
         y += 25
