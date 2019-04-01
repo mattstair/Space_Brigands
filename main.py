@@ -14,14 +14,14 @@ class Game:
         pygame.init()
         pygame.mixer.init()
         self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        self.screen = self.window.subsurface(((WINDOW_WIDTH-SCREEN_WIDTH)/2, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = self.window.subsurface(((WINDOW_WIDTH - SCREEN_WIDTH) / 2, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('Space Brigands!')
         self.clock = pygame.time.Clock()
         self.running = True
         self.img_dir = path.join(path.dirname(__file__), 'img')
         self.player_img = pygame.image.load(path.join(self.img_dir, 'LPWB.png')).convert()
         self.chair_img = pygame.image.load(path.join(self.img_dir, 'chair.png')).convert()
-        self.fluff_img = pygame.image.load(path.join(self.img_dir, 'fluff.png')).convert_alpha()
+        self.fluff_img = pygame.image.load(path.join(self.img_dir, 'fluffinspace1.png')).convert_alpha()
         self.weapons = copy.deepcopy(WEAPONS)
         self.weapons_unlocked = {'side job'}
         # self.weapons_unlocked = {weapon['name'] for weapon in self.weapons}
@@ -55,9 +55,48 @@ class Game:
         self.paused = False
         self.upgrading = False
 
+        self.icons = None
+        self.upgrade_button_images = None
+        self.pause_background = None
+        self.pause_button_images = None
+        self.load_images()
+
+        self.pause_buttons = [
+            Button(bg_img=self.pause_button_images['resume'], return_value='resume'),
+            Button(bg_img=self.pause_button_images['upgrades'], return_value='upgrades'),
+            Button(bg_img=self.pause_button_images['save'], return_value='save'),
+            Button(bg_img=self.pause_button_images['retire'], return_value='retire'),
+            Button(bg_img=self.pause_button_images['restart'], return_value='restart'),
+            Button(bg_img=self.pause_button_images['quit'], return_value='quit')
+        ]
+        y = (SCREEN_HEIGHT - PAUSE_MENU_HEIGHT) / 2 + 63
+        for button in self.pause_buttons:
+            button.rect.center = (WINDOW_WIDTH / 2, y)
+            y += 75
+        self.upgrades = copy.deepcopy(UPGRADES)
+        self.upgrade_window = ScrollWindow((UPGRADE_WINDOW_FULL_WIDTH, UPGRADE_WINDOW_FULL_HEIGHT),
+                                           (UPGRADE_WINDOW_WIDTH, UPGRADE_WINDOW_HEIGHT), WHITE)
+        self.upgrade_window.full_surf.fill(LIGHTBLUE)
+        self.upgrade_buttons = []
+        draw_text(self.upgrade_window.full_surf, 'Strategies:', 30, BLACK, 'topleft', 10, 10)
+        draw_text(self.upgrade_window.full_surf, 'Perks:', 30, BLACK, 'topleft', 10, 710)
+        draw_text(self.upgrade_window.full_surf, 'Activities (repeatable):', 30, BLACK, 'topleft', 10, 1410)
+
+        for upgrade in self.upgrades:
+            upgrade_dict = self.upgrades[upgrade]
+            textlines = [TextLine(upgrade_dict['text'], size=upgrade_dict['font size'])]
+            bg_img = None
+            if upgrade in self.upgrade_button_images:
+                bg_img = self.upgrade_button_images[upgrade][self.upgrades[upgrade]['status']]
+                textlines = None
+            self.upgrade_buttons.append(Button(textlines, auto_size=False, bg_img=bg_img, rect=upgrade_dict['rect'],
+                                               return_value=upgrade))
+
+    def load_images(self):
         self.icons = {
             'burnout': pygame.image.load(path.join(self.img_dir, 'icon-burnout_24x24.png')).convert(),
             'costs': pygame.image.load(path.join(self.img_dir, 'icon-costs_24x24.png')).convert(),
+            'days': pygame.image.load(path.join(self.img_dir, 'icon-days_24x24.png')).convert(),
             'ego': pygame.image.load(path.join(self.img_dir, 'icon-ego_24x24.png')).convert(),
             'energy': pygame.image.load(path.join(self.img_dir, 'icon-energy_24x24.png')).convert(),
             'fire': pygame.image.load(path.join(self.img_dir, 'icon-fire_24x24.png')).convert(),
@@ -73,46 +112,54 @@ class Game:
             'subscribers': pygame.image.load(path.join(self.img_dir, 'icon-subscribers_24x24.png')).convert(),
         }
 
-        self.buttons = [
-            Button([TextLine('Resume')], return_value='resume'),
-            Button([TextLine('Upgrades')], return_value='upgrades'),
-            Button([TextLine('Save')], return_value='save'),
-            Button([TextLine('Retire')], return_value='retire'),
-            Button([TextLine('Restart')], return_value='restart'),
-            Button([TextLine('Quit')], return_value='quit')
-                       ]
-        y = (SCREEN_HEIGHT - PAUSE_MENU_HEIGHT) / 2 + 25
-        for button in self.buttons:
-            button.rect.center = (WINDOW_WIDTH / 2, y)
-            y += 50
-        self.upgrades = copy.deepcopy(UPGRADES)
-        self.upgrade_window = ScrollWindow((UPGRADE_WINDOW_FULL_WIDTH, UPGRADE_WINDOW_FULL_HEIGHT),
-                                           (UPGRADE_WINDOW_WIDTH, UPGRADE_WINDOW_HEIGHT), WHITE)
-        self.upgrade_window.full_surf.fill(LIGHTBLUE)
-        self.upgrade_buttons = []
-        draw_text(self.upgrade_window.full_surf, 'Strategies:', 30, BLACK, 'topleft', 10, 10)
-        draw_text(self.upgrade_window.full_surf, 'Perks:', 30, BLACK, 'topleft', 10, 710)
-        draw_text(self.upgrade_window.full_surf, 'Activities (repeatable):', 30, BLACK, 'topleft', 10, 1410)
-        self.button_backgrounds = {
-            'catch phrase': pygame.image.load(path.join(self.img_dir, 'catch-phrases-200x100.png')).convert_alpha(),
-            'channel art': pygame.image.load(path.join(self.img_dir, 'channel-art-200x100.png')).convert_alpha(),
-            'eat something': pygame.image.load(path.join(self.img_dir, 'eat-something-200x100.png')).convert_alpha(),
-            'fake swears': pygame.image.load(path.join(self.img_dir, 'fake-swears-200x100.png')).convert_alpha(),
-            'gaming chair': pygame.image.load(path.join(self.img_dir, 'gaming-chair-200x100.png')).convert_alpha(),
-            'live stream': pygame.image.load(path.join(self.img_dir, 'live-stream-200x100.png')).convert_alpha(),
-            'puns': pygame.image.load(path.join(self.img_dir, 'puns-200x100.png')).convert_alpha(),
-            'quality content': pygame.image.load(path.join(self.img_dir, 'quality-content-200x100.png')).convert_alpha(),
-            'swears': pygame.image.load(path.join(self.img_dir, 'swears-200x100.png')).convert_alpha(),
+        self.upgrade_button_images = {
+            'ban': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'ban-unavailable-200x100.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'ban-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'ban-active-200x100.png')).convert()},
+            'catch phrase': {
+                'available': pygame.image.load(path.join(self.img_dir, 'catch-phrases-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'catch-phrases-200x100.png')).convert()},
+            'channel art': {
+                'available': pygame.image.load(path.join(self.img_dir, 'channel-art-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'channel-art-200x100.png')).convert()},
+            'eat something': {
+                'available': pygame.image.load(path.join(self.img_dir, 'eat-something-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'eat-something-200x100.png')).convert()},
+            'fake swears': {
+                'available': pygame.image.load(path.join(self.img_dir, 'fake-swears-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'fake-swears-200x100.png')).convert()},
+            'gaming chair': {
+                'available': pygame.image.load(path.join(self.img_dir, 'gaming-chair-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'gaming-chair-200x100.png')).convert()},
+            'guest host': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'guest-host-unavailable-200x100.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'guest-host-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'guest-host-active-200x100.png')).convert()},
+            'live stream': {
+                'available': pygame.image.load(path.join(self.img_dir, 'live-stream-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'live-stream-200x100.png')).convert()},
+            'puns': {
+                'available': pygame.image.load(path.join(self.img_dir, 'puns-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'puns-200x100.png')).convert()},
+            'quality content': {
+                'available': pygame.image.load(path.join(self.img_dir, 'quality-content-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'quality-content-200x100.png')).convert()},
+            'swears': {
+                'available': pygame.image.load(path.join(self.img_dir, 'swears-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'swears-200x100.png')).convert()},
         }
-        for upgrade in self.upgrades:
-            upgrade_dict = self.upgrades[upgrade]
-            text = upgrade_dict['text']
-            bg_img = None
-            if upgrade in self.button_backgrounds:
-                bg_img = self.button_backgrounds[upgrade]
-                text = ''
-            self.upgrade_buttons.append(Button([TextLine(text, size=upgrade_dict['font size'])], bg_img=bg_img,
-                                               auto_size=False, rect=upgrade_dict['rect'], return_value=upgrade))
+
+        self.pause_button_images = {
+            'quit': pygame.image.load(path.join(self.img_dir, 'options-quit-150x50.png')).convert(),
+            'restart': pygame.image.load(path.join(self.img_dir, 'options-restart-150x50.png')).convert(),
+            'resume': pygame.image.load(path.join(self.img_dir, 'options-resume-150x50.png')).convert(),
+            'retire': pygame.image.load(path.join(self.img_dir, 'options-retire-150x50.png')).convert(),
+            'save': pygame.image.load(path.join(self.img_dir, 'options-save-150x50.png')).convert(),
+            'upgrades': pygame.image.load(path.join(self.img_dir, 'options-upgrades-150x50.png')).convert(),
+        }
+
+        self.pause_background = pygame.image.load(path.join(self.img_dir, 'option-200x500.png')).convert()
 
     def star_field(self):
         for i in range(50):
@@ -202,8 +249,8 @@ class Game:
         self.update_upgrades()
 
     def update_conversion(self):
-        conversion_bonus = min(20, max(0, (round(math.log(self.subscribers + self.fake_subscribers + 1, 10)*2) - 2)))
-        self.eff_conversion_rate = round(self.conversion_rate * (100 - self.sketchiness)/100) + conversion_bonus
+        conversion_bonus = min(20, max(0, (round(math.log(self.subscribers + self.fake_subscribers + 1, 10) * 2) - 2)))
+        self.eff_conversion_rate = round(self.conversion_rate * (100 - self.sketchiness) / 100) + conversion_bonus
 
     def update_upgrades(self):
         on_cooldown = False
@@ -212,12 +259,18 @@ class Game:
                 button.change('bg_color', GREY)
             elif ('cooldown' in self.upgrades[button.return_value]
                   and self.upgrades[button.return_value]['cooldown'] > 0):
-                button.change('bg_color', GREY)
+                self.upgrades[button.return_value]['status'] = 'bought'
                 on_cooldown = True
+                button.change('bg_color', GREEN)
             elif self.upgrades[button.return_value]['status'] == 'available':
                 button.change('bg_color', WHITE)
             elif self.upgrades[button.return_value]['status'] == 'bought':
                 button.change('bg_color', GREEN)
+
+            # if button has a background, set its background according to its status
+            if button.return_value in self.upgrade_button_images:
+                button.change('bg_img',
+                              self.upgrade_button_images[button.return_value][self.upgrades[button.return_value]['status']])
 
             self.upgrade_window.full_surf.blit(button.image, button.rect)
 
@@ -226,15 +279,15 @@ class Game:
                 textlist.append(TextLine('(on cooldown)', RED))
 
             if (self.upgrades[button.return_value]['status'] != 'bought' and
-                'costs' in self.upgrades[button.return_value]):
+                    'costs' in self.upgrades[button.return_value]):
                 textlist.append(TextLine('costs:'))
                 for cost in self.upgrades[button.return_value]['costs']:
                     if cost == 'subs':
                         if button.return_value == 'partner':
-                            text = "  "+str(int(self.subscribers * 0.05))+" subs"
+                            text = "  " + str(int(self.subscribers * 0.05)) + " subs"
                             textlist.append(TextLine(text))
                     if cost == 'cash':
-                        text = "  $"+str(self.upgrades[button.return_value]['costs'][cost])
+                        text = "  $" + str(self.upgrades[button.return_value]['costs'][cost])
                         if self.cash >= self.upgrades[button.return_value]['costs']['cash']:
                             color = BLACK
                         else:
@@ -380,7 +433,7 @@ class Game:
 
         self.update_conversion()
 
-        self.revenue = int((self.patrons * 2) + (self.subscribers/1000))
+        self.revenue = int((self.patrons * 2) + (self.subscribers / 1000))
 
         self.update_timer += self.dt
         if self.update_timer > 5.0:
@@ -389,6 +442,7 @@ class Game:
                 if 'cooldown' in self.upgrades[upgrade] and self.upgrades[upgrade]['cooldown'] > 0:
                     self.upgrades[upgrade]['cooldown'] -= 1
                     if self.upgrades[upgrade]['cooldown'] == 0:
+                        self.upgrades[upgrade]['status'] = 'available'
                         if 'fluff' in self.upgrades[upgrade]['action tags']:
                             self.tony.fluff = False
                             self.tony.update_size(self.ego_size)
@@ -426,7 +480,7 @@ class Game:
                         self.paused = False
                 if event.type == pygame.MOUSEBUTTONUP:
                     clicked = False
-                    for button in self.buttons:
+                    for button in self.pause_buttons:
                         if button.rect.collidepoint(mouse):
                             clicked = button.return_value
                     if clicked:
@@ -449,7 +503,7 @@ class Game:
         elif self.upgrading:
             mouse = pygame.mouse.get_pos()
             screen_offset = self.screen.get_offset()
-            offset = (screen_offset[0]+UPGRADE_WINDOW_OFFSET_X, screen_offset[1]+UPGRADE_WINDOW_OFFSET_Y)
+            offset = (screen_offset[0] + UPGRADE_WINDOW_OFFSET_X, screen_offset[1] + UPGRADE_WINDOW_OFFSET_Y)
             rel_mouse = get_rel_mouse(mouse, offset)
             win = self.upgrade_window
             upgrade_mouse = get_rel_mouse(rel_mouse, (-win.xpos, -win.ypos))
@@ -532,12 +586,13 @@ class Game:
         screen_offset = self.screen.get_offset()[0] - 5
         draw_text(self.window, 'STATS:', 30, WHITE, 'topleft', 5, y)
         y += 35
+        self.window.blit(self.icons['days'], (5, y, 24, 24))
         draw_text(self.window, 'Days: ', 20, WHITE, 'topleft', 30, y)
-        draw_text(self.window, "{:,}".format(self.days), 20, WHITE, 'topright',  screen_offset, y)
+        draw_text(self.window, "{:,}".format(self.days), 20, WHITE, 'topright', screen_offset, y)
         y += 25
         self.window.blit(self.icons['likes'], (5, y, 24, 24))
         draw_text(self.window, 'Likes: ', 20, WHITE, 'topleft', 30, y)
-        draw_text(self.window, "{:,}".format(self.likes), 20, WHITE, 'topright',  screen_offset, y)
+        draw_text(self.window, "{:,}".format(self.likes), 20, WHITE, 'topright', screen_offset, y)
         y += 25
         self.window.blit(self.icons['subscribers'], (5, y, 24, 24))
         draw_text(self.window, 'Subscribers: ', 20, WHITE, 'topleft', 30, y)
@@ -550,19 +605,20 @@ class Game:
         y += 25
         self.window.blit(self.icons['money'], (5, y, 24, 24))
         draw_text(self.window, 'Money: ', 20, WHITE, 'topleft', 30, y)
-        draw_text(self.window, '$ '+"{:,}".format(self.cash), 20, WHITE, 'topright', screen_offset, y)
+        draw_text(self.window, '$ ' + "{:,}".format(self.cash), 20, WHITE, 'topright', screen_offset, y)
         y += 25
         self.window.blit(self.icons['revenue'], (5, y, 24, 24))
         draw_text(self.window, 'Revenue: ', 20, WHITE, 'topleft', 30, y)
-        draw_text(self.window, '$ '+"{:,}".format(self.revenue), 20, WHITE, 'topright', screen_offset, y)
+        draw_text(self.window, '$ ' + "{:,}".format(self.revenue), 20, WHITE, 'topright', screen_offset, y)
         y += 25
         self.window.blit(self.icons['costs'], (5, y, 24, 24))
         draw_text(self.window, 'Costs: ', 20, WHITE, 'topleft', 30, y)
-        draw_text(self.window, '$ '+"{:,}".format(self.eat_rate), 20, WHITE, 'topright', screen_offset, y)
+        draw_text(self.window, '$ ' + "{:,}".format(self.eat_rate), 20, WHITE, 'topright', screen_offset, y)
         y += 25
         self.window.blit(self.icons['net'], (5, y, 24, 24))
         draw_text(self.window, 'Net: ', 20, WHITE, 'topleft', 30, y)
-        draw_text(self.window, '$ '+"{:,}".format(self.revenue-self.eat_rate), 20, WHITE, 'topright', screen_offset, y)
+        draw_text(self.window, '$ ' + "{:,}".format(self.revenue - self.eat_rate), 20, WHITE, 'topright', screen_offset,
+                  y)
         y += 35
         self.window.blit(self.icons['energy'], (5, y, 24, 24))
         draw_text(self.window, 'Energy:', 20, WHITE, 'topleft', 30, y)
@@ -581,7 +637,7 @@ class Game:
 
         y += 25
         if self.burn_out > 0:
-                pygame.draw.rect(self.window, RED, (5, y, self.burn_out * 10, 20))
+            pygame.draw.rect(self.window, RED, (5, y, self.burn_out * 10, 20))
         pygame.draw.rect(self.window, WHITE, (5, y, 100, 20), 1)
 
         y += 25
@@ -590,7 +646,7 @@ class Game:
 
         y += 25
         if self.ego_size > 0:
-                pygame.draw.rect(self.window, RED, (5, y, self.ego_size, 20))
+            pygame.draw.rect(self.window, RED, (5, y, self.ego_size, 20))
         pygame.draw.rect(self.window, WHITE, (5, y, 100, 20), 1)
 
         y += 25
@@ -599,7 +655,7 @@ class Game:
 
         y += 25
         if self.sketchiness > 0:
-                pygame.draw.rect(self.window, RED, (5, y, self.sketchiness, 20))
+            pygame.draw.rect(self.window, RED, (5, y, self.sketchiness, 20))
         pygame.draw.rect(self.window, WHITE, (5, y, 100, 20), 1)
 
         # INSTRUCTIONS
@@ -658,7 +714,7 @@ class Game:
                 draw_text(self.window, "(affected by sketchiness)", 25, WHITE, 'topleft',
                           (WINDOW_WIDTH + SCREEN_WIDTH) / 2 + 5, y + 35)
                 y += 30
-            draw_text(self.window, str(self.eff_conversion_rate)+"%", 20, WHITE, 'topleft',
+            draw_text(self.window, str(self.eff_conversion_rate) + "%", 20, WHITE, 'topleft',
                       (WINDOW_WIDTH + SCREEN_WIDTH) / 2 + 5, y + 35)
 
         pygame.draw.rect(self.window, WHITE, self.screen.get_rect(topleft=self.screen.get_offset()), 1)
@@ -669,14 +725,15 @@ class Game:
             menu_rect = pygame.Rect((0, 0, PAUSE_MENU_WIDTH, PAUSE_MENU_HEIGHT))
             menu_rect.centerx = self.window.get_rect().centerx
             menu_rect.centery = self.screen.get_rect().centery
-            pygame.draw.rect(self.window, LIGHTBLUE, menu_rect)
-            for button in self.buttons:
+            self.window.blit(self.pause_background, menu_rect)
+            # pygame.draw.rect(self.window, LIGHTBLUE, menu_rect)
+            for button in self.pause_buttons:
                 self.window.blit(button.image, button.rect)
 
         elif self.upgrading:
             self.upgrade_window.draw(self.screen, (UPGRADE_WINDOW_OFFSET_X, UPGRADE_WINDOW_OFFSET_Y))
             screen_offset = self.screen.get_offset()
-            offset = (screen_offset[0]+UPGRADE_WINDOW_OFFSET_X, screen_offset[1]+UPGRADE_WINDOW_OFFSET_Y)
+            offset = (screen_offset[0] + UPGRADE_WINDOW_OFFSET_X, screen_offset[1] + UPGRADE_WINDOW_OFFSET_Y)
             rel_mouse = get_rel_mouse(mouse, offset)
             win = self.upgrade_window
             upgrade_mouse = get_rel_mouse(rel_mouse, (-win.xpos, -win.ypos))

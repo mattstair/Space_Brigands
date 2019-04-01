@@ -108,7 +108,7 @@ class Log:
 
 
 class Button:
-    def __init__(self, textlines, text_color=BLACK, o_color=BLACK, bg_img=None,
+    def __init__(self, textlines=None, text_color=BLACK, o_color=BLACK, bg_img=None,
                  bg_color=WHITE, auto_size=True, rect=None, w=0, h=0, return_value=True):
         self.textlines = textlines
         self.text_color = text_color
@@ -118,17 +118,21 @@ class Button:
         self.return_value = return_value
         self.text_width = 0
         self.text_height = 1
-        for textline in textlines:
-            self.text_width = max(self.text_width, textline.rect.w + 2)
-            self.text_height += textline.rect.h + 1
+        if textlines:
+            for textline in textlines:
+                self.text_width = max(self.text_width, textline.rect.w + 2)
+                self.text_height += textline.rect.h + 1
 
         self.image = None
         self.tooltip = None
-        if not auto_size:
+        if not auto_size or bg_img:
             if rect:
                 self.rect = pygame.Rect(rect)
             else:
-                self.rect = pygame.Rect(0, 0, w, h)
+                if bg_img:
+                    self.rect = bg_img.get_rect()
+                else:
+                    self.rect = pygame.Rect(0, 0, w, h)
         else:
             self.make_rect()
         self.make_image()
@@ -147,7 +151,8 @@ class Button:
             self.image.blit(self.bg_img, (0, 0))
         pygame.draw.rect(self.image, self.o_color, self.image.get_rect(), 1)
         y = (self.rect.h - self.text_height) / 2
-        for textline in self.textlines:
-            draw_text(self.image, textline.string, textline.size, textline.color, 'midtop',
-                      int(self.rect.w/2), y, textline.bold, textline.italic)
-            y += textline.rect.h + 1
+        if self.textlines:
+            for textline in self.textlines:
+                draw_text(self.image, textline.string, textline.size, textline.color, 'midtop',
+                          int(self.rect.w/2), y, textline.bold, textline.italic)
+                y += textline.rect.h + 1
