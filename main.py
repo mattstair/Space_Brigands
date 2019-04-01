@@ -56,25 +56,22 @@ class Game:
         self.upgrading = False
 
         self.icons = {
-            'analytics': pygame.image.load(path.join(self.img_dir, 'analytics-icon_24x24.png')).convert(),
-            'burnout': pygame.image.load(path.join(self.img_dir, 'burnout-icon_24x24.png')).convert(),
-            'costs': pygame.image.load(path.join(self.img_dir, 'costs-icon_24x24.png')).convert(),
-            'ego': pygame.image.load(path.join(self.img_dir, 'ego-icon_24x24.png')).convert(),
-            'energy': pygame.image.load(path.join(self.img_dir, 'energy-icon_24x24.png')).convert(),
-            'fire': pygame.image.load(path.join(self.img_dir, 'fire-icon_24x24.png')).convert(),
-            'likes': pygame.image.load(path.join(self.img_dir, 'likes-icon_24x24.png')).convert(),
-            'money': pygame.image.load(path.join(self.img_dir, 'money-icon_24x24.png')).convert(),
-            'move': pygame.image.load(path.join(self.img_dir, 'move-icon_24x24.png')).convert(),
-            'net': pygame.image.load(path.join(self.img_dir, 'net-icon_24x24.png')).convert(),
-            'patrons': pygame.image.load(path.join(self.img_dir, 'patrons-icon_24x24.png')).convert(),
-            'pause': pygame.image.load(path.join(self.img_dir, 'pause-icon_24x24.png')).convert(),
-            'quit': pygame.image.load(path.join(self.img_dir, 'quit-icon_24x24.png')).convert(),
-            'revenue': pygame.image.load(path.join(self.img_dir, 'revenue-icon_24x24.png')).convert(),
-            'sketchiness': pygame.image.load(path.join(self.img_dir, 'sketchiness-icon_24x24.png')).convert(),
-            'subscribers': pygame.image.load(path.join(self.img_dir, 'subscribers-icon_24x24.png')).convert(),
+            'burnout': pygame.image.load(path.join(self.img_dir, 'icon-burnout_24x24.png')).convert(),
+            'costs': pygame.image.load(path.join(self.img_dir, 'icon-costs_24x24.png')).convert(),
+            'ego': pygame.image.load(path.join(self.img_dir, 'icon-ego_24x24.png')).convert(),
+            'energy': pygame.image.load(path.join(self.img_dir, 'icon-energy_24x24.png')).convert(),
+            'fire': pygame.image.load(path.join(self.img_dir, 'icon-fire_24x24.png')).convert(),
+            'likes': pygame.image.load(path.join(self.img_dir, 'icon-likes_24x24.png')).convert(),
+            'money': pygame.image.load(path.join(self.img_dir, 'icon-money_24x24.png')).convert(),
+            'move': pygame.image.load(path.join(self.img_dir, 'icon-move_24x24.png')).convert(),
+            'net': pygame.image.load(path.join(self.img_dir, 'icon-net_24x24.png')).convert(),
+            'patrons': pygame.image.load(path.join(self.img_dir, 'icon-patrons_24x24.png')).convert(),
+            'pause': pygame.image.load(path.join(self.img_dir, 'icon-pause_24x24.png')).convert(),
+            'quit': pygame.image.load(path.join(self.img_dir, 'icon-quit_24x24.png')).convert(),
+            'revenue': pygame.image.load(path.join(self.img_dir, 'icon-revenue_24x24.png')).convert(),
+            'sketchiness': pygame.image.load(path.join(self.img_dir, 'icon-sketchiness_24x24.png')).convert(),
+            'subscribers': pygame.image.load(path.join(self.img_dir, 'icon-subscribers_24x24.png')).convert(),
         }
-        for image in self.icons.values():
-            image.set_colorkey((221, 221, 221))
 
         self.buttons = [
             Button([TextLine('Resume')], return_value='resume'),
