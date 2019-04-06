@@ -16,6 +16,7 @@ class Tony(pygame.sprite.Sprite):
         self.game = game
         self.image = pygame.transform.scale(self.game.player_img, (64, 64))
         self.image.set_colorkey((20, 52, 100))
+        self.mask = pygame.mask.from_surface(self.image)
         self.fluff = False
         self.rect = self.image.get_rect()
         self.rect.centerx = SCREEN_WIDTH / 2
@@ -41,6 +42,7 @@ class Tony(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(image, (512, 512))
 
         self.image.set_colorkey((20, 52, 100))
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.midbottom = midbottom
         self.pos = vec(self.rect.topleft)
@@ -103,6 +105,8 @@ class Bullet(pygame.sprite.Sprite):
         self.game = game
         self.image = pygame.Surface((10, 10))
         self.image.fill(LIGHTGREEN)
+        self.image.set_colorkey(WHITE)
+        self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.bottom = y
         self.rect.centerx = x
@@ -128,12 +132,9 @@ class Person(pygame.sprite.Sprite):
         self.game = game
         self.type = random.choices(['nobody', 'small', 'medium', 'large', 'huge'], [100, 20, 10, 5, 1])[0]
         self.troll = random.choices([True, False], [1, 49])[0]
-        self.orig_image = pygame.Surface((50, 50))
-        if self.troll:
-            self.orig_image.fill(GREEN)
-        else:
-            self.orig_image.fill(PURPLE)
+        self.orig_image = pygame.Surface((64, 64))
         self.image = self.orig_image.copy()
+        self.orig_image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.rect.bottom = -10
         self.rect.centerx = random.randrange(self.rect.w / 2, SCREEN_WIDTH - self.rect.w / 2)
@@ -142,7 +143,16 @@ class Person(pygame.sprite.Sprite):
         self.progress = 0
         self.hit_tony = False
         self.generate()
+        if self.troll:
+            self.orig_image.blit(pygame.transform.scale(self.game.troll_img, (self.radius*2 + 4, self.radius*2 + 4)),
+                                 (30 - self.radius, 30 - self.radius))
         self.redraw()
+        self.collision_mask = self.image.copy()
+        if not self.troll:
+            self.collision_mask.fill(WHITE)
+            pygame.draw.circle(self.collision_mask, BLACK, (32, 32), self.radius)
+            self.collision_mask.set_colorkey(WHITE)
+        self.mask = pygame.mask.from_surface(self.collision_mask)
 
     def generate(self):
         self.name = get_random_name()
@@ -155,26 +165,23 @@ class Person(pygame.sprite.Sprite):
 
         if self.type == 'nobody':
             self.sub_count = random.choice([0, 5])
-            self.sub_text = str(self.sub_count)
+            self.radius = 10
             self.max_progress = 100
         elif self.type == 'small':
             self.sub_count = random.choice([25, 50])
-            self.sub_text = str(self.sub_count)
+            self.radius = 15
             self.max_progress = 200
         elif self.type == 'medium':
             self.sub_count = random.choice([1000, 5000])
-            d = {1000: '1 k', 5000: '5 k'}
-            self.sub_text = d[self.sub_count]
+            self.radius = 20
             self.max_progress = 300
         elif self.type == 'large':
             self.sub_count = random.choice([10000, 50000])
-            d = {10000: '10 k', 50000: '50 k'}
-            self.sub_text = d[self.sub_count]
+            self.radius = 25
             self.max_progress = 500
         elif self.type == 'huge':
             self.sub_count = random.choices([1000000, 50000000], [19, 1])[0]
-            d = {1000000: '1 mil', 50000000: '50 mil'}
-            self.sub_text = d[self.sub_count]
+            self.radius = 30
             self.max_progress = 1000
 
         if self.troll:
@@ -272,6 +279,13 @@ class Person(pygame.sprite.Sprite):
     def redraw(self):
         prog_percent = self.progress / self.max_progress
         self.image = self.orig_image.copy()
+        self.image.set_colorkey(WHITE)
+
+        if not self.troll:
+            pygame.draw.circle(self.image, DARKGREEN, (32, 32), self.radius)
+            draw_text(self.image, self.name[0], 2*self.radius, (254, 254, 254), alignment='center',
+                      x=self.rect.w/2, y=self.rect.h/2, bold=True)
+
         if self.progress != 0:
             if prog_percent >= 1:
                 color = BLUE
@@ -285,7 +299,6 @@ class Person(pygame.sprite.Sprite):
                 color = RED
 
             pygame.draw.rect(self.image, color, (0, 0, abs(prog_percent)*self.rect.w, 5))
-        draw_text(self.image, self.sub_text, 20, alignment='center', x=self.rect.w/2, y=self.rect.h/2)
 
     def update(self):
         self.pos.y += self.vel.y * self.game.dt

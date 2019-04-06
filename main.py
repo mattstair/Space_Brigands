@@ -22,6 +22,7 @@ class Game:
         self.player_img = pygame.image.load(path.join(self.img_dir, 'LPWB.png')).convert()
         self.chair_img = pygame.image.load(path.join(self.img_dir, 'chair.png')).convert()
         self.fluff_img = pygame.image.load(path.join(self.img_dir, 'fluffinspace1.png')).convert_alpha()
+        self.troll_img = pygame.image.load(path.join(self.img_dir, 'troll.png')).convert_alpha()
         self.weapons = copy.deepcopy(WEAPONS)
         self.weapons_unlocked = {'side job'}
         # self.weapons_unlocked = {weapon['name'] for weapon in self.weapons}
@@ -113,6 +114,9 @@ class Game:
         }
 
         self.upgrade_button_images = {
+            'analytics': {
+                'available': pygame.image.load(path.join(self.img_dir, 'analytics-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'analytics-200x100.png')).convert()},
             'ban': {
                 'locked': pygame.image.load(path.join(self.img_dir, 'ban-unavailable-200x100.png')).convert(),
                 'available': pygame.image.load(path.join(self.img_dir, 'ban-inactive-200x100.png')).convert(),
@@ -126,12 +130,18 @@ class Game:
             'eat something': {
                 'available': pygame.image.load(path.join(self.img_dir, 'eat-something-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'eat-something-200x100.png')).convert()},
+            'fake subscribers': {
+                'available': pygame.image.load(path.join(self.img_dir, 'subscribers-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'subscribers-200x100.png')).convert()},
             'fake swears': {
                 'available': pygame.image.load(path.join(self.img_dir, 'fake-swears-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'fake-swears-200x100.png')).convert()},
             'gaming chair': {
                 'available': pygame.image.load(path.join(self.img_dir, 'gaming-chair-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'gaming-chair-200x100.png')).convert()},
+            'green screen': {
+                'available': pygame.image.load(path.join(self.img_dir, 'greenscreen-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'greenscreen-200x100.png')).convert()},
             'guest host': {
                 'locked': pygame.image.load(path.join(self.img_dir, 'guest-host-unavailable-200x100.png')).convert(),
                 'available': pygame.image.load(path.join(self.img_dir, 'guest-host-inactive-200x100.png')).convert(),
@@ -139,12 +149,18 @@ class Game:
             'live stream': {
                 'available': pygame.image.load(path.join(self.img_dir, 'live-stream-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'live-stream-200x100.png')).convert()},
+            'partner': {
+                'available': pygame.image.load(path.join(self.img_dir, 'advertisers-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'advertisers-200x100.png')).convert()},
             'puns': {
                 'available': pygame.image.load(path.join(self.img_dir, 'puns-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'puns-200x100.png')).convert()},
             'quality content': {
                 'available': pygame.image.load(path.join(self.img_dir, 'quality-content-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'quality-content-200x100.png')).convert()},
+            'self stirring mug': {
+                'available': pygame.image.load(path.join(self.img_dir, 'mug-inactive-200x100.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'mug-200x100.png')).convert()},
             'swears': {
                 'available': pygame.image.load(path.join(self.img_dir, 'swears-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'swears-200x100.png')).convert()},
@@ -409,13 +425,14 @@ class Game:
                 self.energy_flash = False
 
         # hit mobs with bullets
-        mob_hits = pygame.sprite.groupcollide(self.all_people, self.all_bullets, False, True)
+        mob_hits = pygame.sprite.groupcollide(self.all_people, self.all_bullets, False, True,
+                                              pygame.sprite.collide_mask)
         for mob in mob_hits:
             for bullet in mob_hits[mob]:
                 mob.hit(bullet.type, bullet.damage)
 
         # hit tony with mobs
-        tony_hits = pygame.sprite.spritecollide(self.tony, self.all_people, False)
+        tony_hits = pygame.sprite.spritecollide(self.tony, self.all_people, False, pygame.sprite.collide_mask)
         for mob in tony_hits:
             if not mob.hit_tony:
                 mob.progress -= 0.5 * mob.max_progress
@@ -423,6 +440,7 @@ class Game:
                 mob.redraw()
 
         self.all_sprites.update()
+        self.chair.update()
 
         if self.likes < 0:
             self.likes = 0
