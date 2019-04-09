@@ -28,10 +28,10 @@ class Game:
         # self.weapons_unlocked = {weapon['name'] for weapon in self.weapons}
         self.weapon_index = 0
         self.fire_rate = self.weapons[self.weapon_index]['rate']
-        self.last_shot = 0
-        self.recent_shots = []
-        self.burn_out = 0
-        self.ego_size = 0
+        self.last_shot = 0  # timer
+        self.recent_shots = []  # history of recent shots
+        self.burn_out = 0  # out of 100
+        self.ego_size = 0  # out of 100
         self.days = 0
         self.likes = 0
         self.subscribers = 0
@@ -43,9 +43,9 @@ class Game:
         self.max_energy = 0
         self.energy_bonus = 1.0
         self.eat_rate = 0
-        self.conversion_rate = 10
-        self.sketchiness = 0
-        self.eff_conversion_rate = 10
+        self.conversion_rate = 10  # out of 100
+        self.sketchiness = 0  # out of 100
+        self.eff_conversion_rate = 10  # out of 100
         self.spawn_timer = 0.0
         self.sparkle_timer = 0
         self.update_timer = 0.0
@@ -74,24 +74,28 @@ class Game:
         for button in self.pause_buttons:
             button.rect.center = (WINDOW_WIDTH / 2, y)
             y += 75
+
         self.upgrades = copy.deepcopy(UPGRADES)
         self.upgrade_window = ScrollWindow((UPGRADE_WINDOW_FULL_WIDTH, UPGRADE_WINDOW_FULL_HEIGHT),
                                            (UPGRADE_WINDOW_WIDTH, UPGRADE_WINDOW_HEIGHT), WHITE)
         self.upgrade_window.full_surf.fill(LIGHTBLUE)
-        self.upgrade_buttons = []
         draw_text(self.upgrade_window.full_surf, 'Strategies:', 30, BLACK, 'topleft', 10, 10)
         draw_text(self.upgrade_window.full_surf, 'Perks:', 30, BLACK, 'topleft', 10, 710)
         draw_text(self.upgrade_window.full_surf, 'Activities (repeatable):', 30, BLACK, 'topleft', 10, 1410)
 
+        self.upgrade_buttons = []
         for upgrade in self.upgrades:
             upgrade_dict = self.upgrades[upgrade]
-            textlines = [TextLine(upgrade_dict['text'], size=upgrade_dict['font size'])]
             bg_img = None
+            textlines = None
+            o_color = None
             if upgrade in self.upgrade_button_images:
                 bg_img = self.upgrade_button_images[upgrade][self.upgrades[upgrade]['status']]
-                textlines = None
-            self.upgrade_buttons.append(Button(textlines, auto_size=False, bg_img=bg_img, rect=upgrade_dict['rect'],
-                                               return_value=upgrade))
+            else:
+                textlines = [TextLine(upgrade_dict['text'], size=upgrade_dict['font size'])]
+                o_color = BLACK
+            self.upgrade_buttons.append(Button(textlines, auto_size=False, o_color=o_color, bg_img=bg_img,
+                                               rect=upgrade_dict['rect'], return_value=upgrade))
 
     def load_images(self):
         self.icons = {
@@ -113,6 +117,49 @@ class Game:
             'subscribers': pygame.image.load(path.join(self.img_dir, 'icon-subscribers_24x24.png')).convert(),
         }
 
+        upgrade_icons = {
+            'effectiveness 1': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'effectiveness_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'effectiveness_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'effectiveness_32x32.png')).convert(),
+            },
+            'effectiveness 2': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'effectivenessx2_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'effectivenessx2_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'effectivenessx2_32x32.png')).convert(),
+            },
+            'size 1': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'size_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'size_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'size_32x32.png')).convert(),
+            },
+            'size 2': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'sizex2_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'sizex2_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'sizex2_32x32.png')).convert(),
+            },
+            'size 3': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'sizex3_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'sizex3_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'sizex3_32x32.png')).convert(),
+            },
+            'size 4': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'sizex4_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'sizex4_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'sizex4_32x32.png')).convert(),
+            },
+            'speed 1': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'speed_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'speed_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'speed_32x32.png')).convert(),
+            },
+            'speed 2': {
+                'locked': pygame.image.load(path.join(self.img_dir, 'speedx2_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'speedx2_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'speedx2_32x32.png')).convert(),
+            },
+        }
+
         self.upgrade_button_images = {
             'analytics': {
                 'available': pygame.image.load(path.join(self.img_dir, 'analytics-inactive-200x100.png')).convert(),
@@ -124,6 +171,22 @@ class Game:
             'catch phrase': {
                 'available': pygame.image.load(path.join(self.img_dir, 'catch-phrases-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'catch-phrases-200x100.png')).convert()},
+            'CP dmg 1': {
+                'locked': upgrade_icons['effectiveness 1']['locked'],
+                'available': upgrade_icons['effectiveness 1']['available'],
+                'bought': upgrade_icons['effectiveness 1']['bought']},
+            'CP dmg 2': {
+                'locked': upgrade_icons['effectiveness 2']['locked'],
+                'available': upgrade_icons['effectiveness 2']['available'],
+                'bought': upgrade_icons['effectiveness 2']['bought']},
+            'CP speed 1': {
+                'locked': upgrade_icons['speed 1']['locked'],
+                'available': upgrade_icons['speed 1']['available'],
+                'bought': upgrade_icons['speed 1']['bought']},
+            'CP speed 2': {
+                'locked': upgrade_icons['speed 2']['locked'],
+                'available': upgrade_icons['speed 2']['available'],
+                'bought': upgrade_icons['speed 2']['bought']},
             'channel art': {
                 'available': pygame.image.load(path.join(self.img_dir, 'channel-art-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'channel-art-200x100.png')).convert()},
@@ -136,9 +199,41 @@ class Game:
             'fake swears': {
                 'available': pygame.image.load(path.join(self.img_dir, 'fake-swears-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'fake-swears-200x100.png')).convert()},
+            'FS dmg 1': {
+                'locked': upgrade_icons['effectiveness 1']['locked'],
+                'available': upgrade_icons['effectiveness 1']['available'],
+                'bought': upgrade_icons['effectiveness 1']['bought']},
+            'FS dmg 2': {
+                'locked': upgrade_icons['effectiveness 2']['locked'],
+                'available': upgrade_icons['effectiveness 2']['available'],
+                'bought': upgrade_icons['effectiveness 2']['bought']},
+            'FS speed 1': {
+                'locked': upgrade_icons['speed 1']['locked'],
+                'available': upgrade_icons['speed 1']['available'],
+                'bought': upgrade_icons['speed 1']['bought']},
+            'FS speed 2': {
+                'locked': upgrade_icons['speed 2']['locked'],
+                'available': upgrade_icons['speed 2']['available'],
+                'bought': upgrade_icons['speed 2']['bought']},
             'gaming chair': {
                 'available': pygame.image.load(path.join(self.img_dir, 'gaming-chair-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'gaming-chair-200x100.png')).convert()},
+            'GC size 1': {
+                'locked': upgrade_icons['size 1']['locked'],
+                'available': upgrade_icons['size 1']['available'],
+                'bought': upgrade_icons['size 1']['bought']},
+            'GC size 2': {
+                'locked': upgrade_icons['size 2']['locked'],
+                'available': upgrade_icons['size 2']['available'],
+                'bought': upgrade_icons['size 2']['bought']},
+            'GC size 3': {
+                'locked': upgrade_icons['size 3']['locked'],
+                'available': upgrade_icons['size 3']['available'],
+                'bought': upgrade_icons['size 3']['bought']},
+            'GC size 4': {
+                'locked': upgrade_icons['size 4']['locked'],
+                'available': upgrade_icons['size 4']['available'],
+                'bought': upgrade_icons['size 4']['bought']},
             'green screen': {
                 'available': pygame.image.load(path.join(self.img_dir, 'greenscreen-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'greenscreen-200x100.png')).convert()},
@@ -155,15 +250,64 @@ class Game:
             'puns': {
                 'available': pygame.image.load(path.join(self.img_dir, 'puns-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'puns-200x100.png')).convert()},
+            'puns dmg 1': {
+                'locked': upgrade_icons['effectiveness 1']['locked'],
+                'available': upgrade_icons['effectiveness 1']['available'],
+                'bought': upgrade_icons['effectiveness 1']['bought']},
+            'puns dmg 2': {
+                'locked': upgrade_icons['effectiveness 2']['locked'],
+                'available': upgrade_icons['effectiveness 2']['available'],
+                'bought': upgrade_icons['effectiveness 2']['bought']},
+            'puns speed 1': {
+                'locked': upgrade_icons['speed 1']['locked'],
+                'available': upgrade_icons['speed 1']['available'],
+                'bought': upgrade_icons['speed 1']['bought']},
+            'puns speed 2': {
+                'locked': upgrade_icons['speed 2']['locked'],
+                'available': upgrade_icons['speed 2']['available'],
+                'bought': upgrade_icons['speed 2']['bought']},
             'quality content': {
                 'available': pygame.image.load(path.join(self.img_dir, 'quality-content-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'quality-content-200x100.png')).convert()},
+            'QC dmg 1': {
+                'locked': upgrade_icons['effectiveness 1']['locked'],
+                'available': upgrade_icons['effectiveness 1']['available'],
+                'bought': upgrade_icons['effectiveness 1']['bought']},
+            'QC dmg 2': {
+                'locked': upgrade_icons['effectiveness 2']['locked'],
+                'available': upgrade_icons['effectiveness 2']['available'],
+                'bought': upgrade_icons['effectiveness 2']['bought']},
+            'QC speed 1': {
+                'locked': upgrade_icons['speed 1']['locked'],
+                'available': upgrade_icons['speed 1']['available'],
+                'bought': upgrade_icons['speed 1']['bought']},
+            'QC speed 2': {
+                'locked': upgrade_icons['speed 2']['locked'],
+                'available': upgrade_icons['speed 2']['available'],
+                'bought': upgrade_icons['speed 2']['bought']},
             'self stirring mug': {
                 'available': pygame.image.load(path.join(self.img_dir, 'mug-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'mug-200x100.png')).convert()},
             'swears': {
                 'available': pygame.image.load(path.join(self.img_dir, 'swears-inactive-200x100.png')).convert(),
                 'bought': pygame.image.load(path.join(self.img_dir, 'swears-200x100.png')).convert()},
+            'swears dmg 1': {
+                'locked': upgrade_icons['effectiveness 1']['locked'],
+                'available': upgrade_icons['effectiveness 1']['available'],
+                'bought': upgrade_icons['effectiveness 1']['bought']},
+            'swears dmg 2': {
+                'locked': upgrade_icons['effectiveness 2']['locked'],
+                'available': upgrade_icons['effectiveness 2']['available'],
+                'bought': upgrade_icons['effectiveness 2']['bought']},
+            'swears speed 1': {
+                'locked': upgrade_icons['speed 1']['locked'],
+                'available': upgrade_icons['speed 1']['available'],
+                'bought': upgrade_icons['speed 1']['bought']},
+            'swears speed 2': {
+                'locked': upgrade_icons['speed 2']['locked'],
+                'available': upgrade_icons['speed 2']['available'],
+                'bought': upgrade_icons['speed 2']['bought']},
+
         }
 
         self.pause_button_images = {
@@ -189,7 +333,7 @@ class Game:
         unlockable = True
         if self.upgrades[upgrade]['status'] != 'available':
             unlockable = False
-        if unlockable:
+        else:
             for cost in self.upgrades[upgrade]['costs']:
                 if cost == 'cash' and self.upgrades[upgrade]['costs']['cash'] > self.cash:
                     unlockable = False
@@ -217,7 +361,8 @@ class Game:
             self.energy_bonus = 1.5
         if 'green screen' in tags:
             for weapon in self.weapons:
-                weapon['damage'] = int(weapon['damage'] * 1.5)
+                if weapon != 'side job':
+                    weapon['damage'] = int(weapon['damage'] * 1.5)
         if 'fake subs' in tags:
             self.fake_subscribers += 1000
             self.sketchiness += 10
@@ -250,15 +395,12 @@ class Game:
 
         if 'unlocks' in upgrade_dict:
             for unlock in upgrade_dict['unlocks']:
-                for u in self.upgrades:
-                    if u == unlock:
-                        self.upgrades[u]['status'] = 'available'
+                self.upgrades[unlock]['status'] = 'available'
 
         if 'cooldown' in upgrade_dict:
             self.upgrades[upgrade]['cooldown'] = self.upgrades[upgrade]['base cooldown']
 
-        if 'repeatable' not in tags:
-            self.upgrades[upgrade]['status'] = 'bought'
+        self.upgrades[upgrade]['status'] = 'bought'
 
         self.log.add_text(self.upgrades[upgrade]['log text'])
         self.switch_weapon(0)
@@ -272,21 +414,24 @@ class Game:
         on_cooldown = False
         for button in self.upgrade_buttons:
             if self.upgrades[button.return_value]['status'] == 'locked':
-                button.change('bg_color', GREY)
+                if button.bg_img is None:
+                    button.change('bg_color', GREY)
             elif ('cooldown' in self.upgrades[button.return_value]
                   and self.upgrades[button.return_value]['cooldown'] > 0):
-                self.upgrades[button.return_value]['status'] = 'bought'
                 on_cooldown = True
-                button.change('bg_color', GREEN)
+                if button.bg_img is None:
+                    button.change('bg_color', GREEN)
             elif self.upgrades[button.return_value]['status'] == 'available':
-                button.change('bg_color', WHITE)
+                if button.bg_img is None:
+                    button.change('bg_color', WHITE)
             elif self.upgrades[button.return_value]['status'] == 'bought':
-                button.change('bg_color', GREEN)
+                if button.bg_img is None:
+                    button.change('bg_color', GREEN)
 
             # if button has a background, set its background according to its status
             if button.return_value in self.upgrade_button_images:
-                button.change('bg_img',
-                              self.upgrade_button_images[button.return_value][self.upgrades[button.return_value]['status']])
+                new_img = self.upgrade_button_images[button.return_value][self.upgrades[button.return_value]['status']]
+                button.change('bg_img', new_img)
 
             self.upgrade_window.full_surf.blit(button.image, button.rect)
 
