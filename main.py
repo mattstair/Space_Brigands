@@ -373,7 +373,7 @@ class Game:
             self.ego_size -= 10
             self.ego_size = max(0, self.ego_size)
             self.tony.fluff = True
-            self.tony.update_size(self.ego_size)
+            self.tony.update_size()
 
         for cost in upgrade_dict['costs']:
             if cost == 'cash':
@@ -574,7 +574,7 @@ class Game:
                                               pygame.sprite.collide_mask)
         for mob in mob_hits:
             for bullet in mob_hits[mob]:
-                mob.hit(bullet.type, bullet.damage)
+                mob.hit(bullet.flavor, bullet.damage)
 
         # hit tony with mobs
         tony_hits = pygame.sprite.spritecollide(self.tony, self.all_people, False, pygame.sprite.collide_mask)
@@ -608,9 +608,8 @@ class Game:
                         self.upgrades[upgrade]['status'] = 'available'
                         if 'fluff' in self.upgrades[upgrade]['action tags']:
                             self.tony.fluff = False
-                            self.tony.update_size(self.ego_size)
 
-            self.tony.update_size(self.ego_size)
+            self.tony.update_size()
             self.likes += self.subscribers // 100
             self.cash += self.revenue
 
@@ -642,7 +641,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE or event.key == pygame.K_p:
                         self.paused = False
                 if event.type == pygame.MOUSEBUTTONUP:
-                    clicked = False
+                    clicked = None
                     for button in self.pause_buttons:
                         if button.rect.collidepoint(mouse):
                             clicked = button.return_value
@@ -696,9 +695,11 @@ class Game:
                                 win.moving_v = True
                                 win.start_mouse = rel_mouse
                                 win.start_y = win.v_sb.top
+                    # scroll up
                     elif event.button == 4:
                         if win.window_surf.get_rect().collidepoint(rel_mouse):
                             win.scroll(-10)
+                    # scroll down
                     elif event.button == 5:
                         if win.window_surf.get_rect().collidepoint(rel_mouse):
                             win.scroll(10)
@@ -842,7 +843,7 @@ class Game:
         draw_text(self.window, 'ESC', 20, WHITE, 'topright', screen_offset, y)
 
         # WEAPON STATS
-        draw_text(self.window, self.weapons[self.weapon_index]['title'], 50, WHITE, 'bottomright',
+        draw_text(self.window, self.weapons[self.weapon_index]['title'], 50, PURPLE, 'bottomright',
                   WINDOW_WIDTH - 5, WINDOW_HEIGHT - 50)
         y = WINDOW_HEIGHT - 300
         draw_text(self.window, "STRATEGY:", 30, WHITE, 'topleft', (WINDOW_WIDTH + SCREEN_WIDTH) / 2 + 5, y - 35)
@@ -889,7 +890,6 @@ class Game:
             menu_rect.centerx = self.window.get_rect().centerx
             menu_rect.centery = self.screen.get_rect().centery
             self.window.blit(self.pause_background, menu_rect)
-            # pygame.draw.rect(self.window, LIGHTBLUE, menu_rect)
             for button in self.pause_buttons:
                 self.window.blit(button.image, button.rect)
 

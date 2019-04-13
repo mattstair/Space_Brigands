@@ -24,7 +24,7 @@ class Tony(pygame.sprite.Sprite):
         self.pos = vec(self.rect.topleft)
         self.vel = vec(0, 0)
 
-    def update_size(self, size):
+    def update_size(self):
         midbottom = self.rect.midbottom
 
         if self.fluff:
@@ -32,11 +32,11 @@ class Tony(pygame.sprite.Sprite):
         else:
             image = self.game.player_img
 
-        if size < 50:
+        if self.game.ego_size < 50:
             self.image = pygame.transform.scale(image, (64, 64))
-        elif size < 75:
+        elif self.game.ego_size < 75:
             self.image = pygame.transform.scale(image, (128, 128))
-        elif size < 100:
+        elif self.game.ego_size < 100:
             self.image = pygame.transform.scale(image, (256, 256))
         else:
             self.image = pygame.transform.scale(image, (512, 512))
@@ -69,9 +69,8 @@ class Chair(pygame.sprite.Sprite):
     def __init__(self, game):
         pygame.sprite.Sprite.__init__(self)
         self._layer = 2
-        self.groups = game.all_sprites, game.chairs
-        for group in self.groups:
-            group.add(self)
+        game.all_sprites.add(self)
+        game.chairs.add(self)
         self.game = game
         self.size_factor = 0
         self.image = pygame.transform.scale(self.game.chair_img, (64, 64))
@@ -96,7 +95,7 @@ class Chair(pygame.sprite.Sprite):
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, game, x, y, type, damage):
+    def __init__(self, game, x, y, flavor, damage):
         pygame.sprite.Sprite.__init__(self)
         self._layer = 3
         self.groups = game.all_sprites, game.all_bullets
@@ -112,7 +111,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.centerx = x
         self.pos = vec(self.rect.topleft)
         self.vel = vec(0, -500)
-        self.type = type
+        self.flavor = flavor
         self.damage = damage
 
     def update(self):
@@ -219,23 +218,23 @@ class Person(pygame.sprite.Sprite):
         if prog_percent >= 1:
             patron = random.choices([True, False], [1, 4])[0]
             if patron:
-                death_message = "became a patron"
+                death_message = "became a patron."
                 self.game.patrons += 1
             else:
-                death_message = "liked and subscribed"
+                death_message = "liked and subscribed."
             sub_dif = round(int(self.sub_count * 0.2) * self.game.eff_conversion_rate / 100)
             self.game.subscribers += 1
             if sub_dif > 0:
                 self.game.subscribers += sub_dif
-                death_message = "praised your channel! You got " + "{:,}".format(sub_dif) + " more subscribers"
+                death_message = "praised your channel! You got " + "{:,}".format(sub_dif) + " more subscribers."
             self.game.likes += 1
         elif prog_percent >= 0.5:
-            death_message = "liked and subscribed"
+            death_message = "liked and subscribed."
             sub_dif = round(int(self.sub_count * 0.05) * self.game.eff_conversion_rate / 100)
             self.game.subscribers += 1
             if sub_dif > 0:
                 self.game.subscribers += sub_dif
-                death_message = "mentioned your channel! You got " + "{:,}".format(sub_dif) + " more subscribers"
+                death_message = "mentioned your channel! You got " + "{:,}".format(sub_dif) + " more subscribers."
             self.game.likes += 1
         elif prog_percent >= 0.2:
             self.game.likes += 1
@@ -250,7 +249,9 @@ class Person(pygame.sprite.Sprite):
             if sub_dif < 0:
                 self.game.subscribers += sub_dif
                 death_message = death_message + ", convincing " + "{:,}".format(-sub_dif) + \
-                                                " of your subscribers to unsubscribe from you"
+                                                " of your subscribers to unsubscribe from you."
+            else:
+                death_message = death_message + "."
             self.game.likes -= 1
         if len(death_message) > 0:
             self.game.log.add_text(self.name + " " + death_message)

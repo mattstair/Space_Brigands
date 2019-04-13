@@ -16,44 +16,28 @@ def draw_text(screen, text, size, color=WHITE, alignment='topleft', x=0, y=0, bo
     return text_rect
 
 
-# def draw_healthbar(game, health, max_health):
-#     pct = health / max_health
-#
-#     if pct > .5:
-#         col = GREEN
-#     elif pct > .25:
-#         col = YELLOW
-#     else:
-#         col = RED
-#
-#     mid_right = draw_text(game, 'Channel Health:', 15, WHITE, 'topleft', 5, 5).midright
-#
-#     if health > 0:
-#         pygame.draw.rect(game.screen, col, (mid_right[0] + 5, mid_right[1] - 3, health, 10))
-#     pygame.draw.rect(game.screen, WHITE, (mid_right[0] + 5, mid_right[1] - 3, max_health, 10), 1)
-
-
-def text_objects(text, size, color=BLACK, bold=False, italic=False, bg=None):
-    text_surface = pygame.font.SysFont(FONT, size, bold, italic).render(text, True, color, bg)
+def text_objects(text, size, color=BLACK, bold=False, italic=False, bg_color=None):
+    text_surface = pygame.font.SysFont(FONT, size, bold, italic).render(text, True, color, bg_color)
     return text_surface, text_surface.get_rect()
 
 
 class TextLine:
-    def __init__(self, string, color=BLACK, size=20, bold=False, italic=False, bg=None, return_val=None):
+    def __init__(self, string, color=BLACK, size=20, bold=False, italic=False, bg_color=None, return_val=None):
         self.string = string
         self.color = color
         self.size = size
         self.bold = bold
         self.italic = italic
-        self.bg = bg
+        self.bg_color = bg_color
         self.return_val = return_val
-        self.__image, self.rect = text_objects(self.string, self.size, self.color, self.bold, self.italic, self.bg)
+        self.__image, self.rect = text_objects(self.string, self.size, self.color, self.bold, self.italic,
+                                               self.bg_color)
         self.tooltip = None
 
     @property
     def image(self):
         if self.__image is None:
-            self.__image, _ = text_objects(self.string, self.size, self.color, self.bold, self.italic, self.bg)
+            self.__image, _ = text_objects(self.string, self.size, self.color, self.bold, self.italic, self.bg_color)
         return self.__image
 
     def clean(self):
@@ -62,7 +46,7 @@ class TextLine:
 
 
 class ToolTip:
-    def __init__(self, text_list, o_color=None):
+    def __init__(self, text_list, o_color=None, bg_color=WHITE):
         # text_list is a list of TextLines
         self.text_list = text_list
         self.o_color = o_color
@@ -73,7 +57,7 @@ class ToolTip:
             self.h += line.rect.h
         self.h += 2
         self.image = pygame.Surface((self.w, self.h))
-        self.image.fill(WHITE)
+        self.image.fill(bg_color)
         self.image.set_alpha(220)
         self.make()
 
@@ -125,7 +109,7 @@ class Button:
 
         self.image = None
         self.tooltip = None
-        if not auto_size or bg_img:
+        if bg_img or not auto_size:
             if rect:
                 self.rect = pygame.Rect(rect)
             else:
@@ -134,25 +118,26 @@ class Button:
                 else:
                     self.rect = pygame.Rect(0, 0, w, h)
         else:
-            self.make_rect()
+            self.rect = pygame.Rect(0, 0, self.text_width + 2, self.text_height + 2)
+
         self.make_image()
 
     def change(self, attribute, val):
         self.__setattr__(attribute, val)
         self.make_image()
 
-    def make_rect(self):
-        self.rect = pygame.Rect(0, 0, self.text_width + 2, self.text_height + 2)
-
     def make_image(self):
         self.image = pygame.Surface((self.rect.w, self.rect.h))
         self.image.fill(self.bg_color)
+
         if self.bg_img:
             self.image.blit(self.bg_img, (0, 0))
+
         if self.o_color:
             pygame.draw.rect(self.image, self.o_color, self.image.get_rect(), 1)
-        y = (self.rect.h - self.text_height) / 2
+
         if self.textlines:
+            y = (self.rect.h - self.text_height) / 2
             for textline in self.textlines:
                 draw_text(self.image, textline.string, textline.size, textline.color, 'midtop',
                           int(self.rect.w/2), y, textline.bold, textline.italic)
