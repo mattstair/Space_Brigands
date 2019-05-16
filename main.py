@@ -514,7 +514,7 @@ class Game:
         self.ego_size = 0
         self.days = 0
         self.likes = 0
-        self.subscribers = 1000
+        self.subscribers = 0
         self.fake_subscribers = 0
         self.patrons = 0
         self.cash = 1000000

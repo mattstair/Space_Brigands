@@ -41,7 +41,8 @@ class Tony(pygame.sprite.Sprite):
         else:
             self.image = pygame.transform.scale(image, (512, 512))
 
-        self.image.set_colorkey((20, 52, 100))
+        if not self.fluff:
+            self.image.set_colorkey((20, 52, 100))
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect()
         self.rect.midbottom = midbottom
@@ -275,7 +276,7 @@ class Person(pygame.sprite.Sprite):
                 self.game.ego_size -= 100
 
             self.game.ego_size = max(0, min(100, self.game.ego_size))
-            self.game.tony.update_size(self.game.ego_size)
+            self.game.tony.update_size()
 
     def redraw(self):
         prog_percent = self.progress / self.max_progress
