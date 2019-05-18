@@ -119,44 +119,44 @@ class Game:
 
         upgrade_icons = {
             'effectiveness 1': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'effectiveness_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'effectiveness_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'effectiveness_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'effectiveness-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'effectiveness-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'effectiveness-active_32x32.png')).convert(),
             },
             'effectiveness 2': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'effectivenessx2_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'effectivenessx2_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'effectivenessx2_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'effectivenessx2-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'effectivenessx2-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'effectivenessx2-active_32x32.png')).convert(),
             },
             'size 1': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'size_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'size_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'size_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'size-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'size-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'size-active_32x32.png')).convert(),
             },
             'size 2': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'sizex2_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'sizex2_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'sizex2_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'sizex2-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'sizex2-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'sizex2-active_32x32.png')).convert(),
             },
             'size 3': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'sizex3_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'sizex3_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'sizex3_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'sizex3-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'sizex3-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'sizex3-active_32x32.png')).convert(),
             },
             'size 4': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'sizex4_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'sizex4_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'sizex4_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'sizex4-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'sizex4-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'sizex4-active_32x32.png')).convert(),
             },
             'speed 1': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'speed_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'speed_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'speed_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'speed-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'speed-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'speed-active_32x32.png')).convert(),
             },
             'speed 2': {
-                'locked': pygame.image.load(path.join(self.img_dir, 'speedx2_32x32.png')).convert(),
-                'available': pygame.image.load(path.join(self.img_dir, 'speedx2_32x32.png')).convert(),
-                'bought': pygame.image.load(path.join(self.img_dir, 'speedx2_32x32.png')).convert(),
+                'locked': pygame.image.load(path.join(self.img_dir, 'speedx2-unavailable_32x32.png')).convert(),
+                'available': pygame.image.load(path.join(self.img_dir, 'speedx2-inactive_32x32.png')).convert(),
+                'bought': pygame.image.load(path.join(self.img_dir, 'speedx2-active_32x32.png')).convert(),
             },
         }
 
