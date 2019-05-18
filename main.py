@@ -517,7 +517,7 @@ class Game:
         self.subscribers = 0
         self.fake_subscribers = 0
         self.patrons = 0
-        self.cash = 1000000
+        self.cash = 100
         self.revenue = 0
         self.energy = 100
         self.max_energy = 100
